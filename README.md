@@ -21,4 +21,4 @@ You will find various settings that you can change at the top of the file. Open 
 Follow the steps for installing and overwrite the files when prompted.
 
 # Suggestions or Issues?
-Open a issue! Or create a message in a tread under my mod in the discord server and I'll try and address it when I have the time.
+Open a issue! Or create a message in a thread under my mod in the discord server and I'll try and address it when I have the time.

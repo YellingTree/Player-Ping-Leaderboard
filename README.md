@@ -29,3 +29,22 @@ Usernames are just pixilated for screenshot
 ![Background Off](https://github.com/YellingTree/Player-Ping-Leaderboard/blob/main/github-assets/Leaderboard_Bg_Off.png?raw=true)
 ### Background On (Changed in settings)
 ![Background On](https://github.com/YellingTree/Player-Ping-Leaderboard/blob/main/github-assets/Leaderboard_Bg_On.png?raw=true)
+
+# Old Changelogs from Discord
+All new changes will be listed with each [Release](https://github.com/YellingTree/Player-Ping-Leaderboard/releases)
+### Version 1.0 (First Release)
+- Adds a simple overlay into Titanfall 2 Matches which simply lists the players connected and their pings
+### Version 2.0
+- Separated users for easier reading, creating dividers between each entry. This can be changed back to the old view in the settings.
+- Added player's K/D to the leaderboad
+- Ajusted defualt placement
+### Version 2.5
+- Changed how the overlay works under the hood to better separate information
+- Text now remains in a static place (E.g going from a K/D of 9/9 to 10/9 won't cause the ping to shift over)
+- Long names *should* no longer cause information to spill off screen
+- Overlay now shows on top of other hud screen elements such as kill feed, drop cards, and faction leader comms.
+- Option to disable dividers removed, dividers will be the only option going forward, sorry.
+### Version 2.6: First GitHub Version
+Find changes on [Releases](https://github.com/YellingTree/Player-Ping-Leaderboard/releases)
+
+

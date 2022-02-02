@@ -1,0 +1,17 @@
+{
+	"Name": "Ping Leaderboard",
+	"Description": "Shows the ping of connected players in a server. Overlay is toggled with the F1 key.",
+	"LoadPriority": 2,
+	"RequiredOnClient": false,
+	"Version": "2.6",
+
+	"Scripts": [
+		{
+			"Path": "playerping.nut",
+			"RunOn": "CLIENT",
+			"ClientCallback": {
+				"After": "playerPingPreCache"
+			}
+		}
+	]
+}

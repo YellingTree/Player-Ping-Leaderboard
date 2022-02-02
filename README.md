@@ -15,7 +15,9 @@ Download the PlayerPing.zip from [Releases](https://github.com/YellingTree/Playe
 Simply open the **playerping.nut** located here: 
 >\R2Northstar\mods\PlayerPing\mod\scipts\vscripts\playerping.nut
 
-You will find various settings that you can change at the top of the file. Open with prefered text editor
+You will find various settings that you can change at the top of the file related to position and apperance. Open with prefered text editor.
+
+**NOTE:** Currently moving the overlay too far right can cause issues with the mod trying to place elements. This will be addressed in a later update and this note will be removed.
 
 # Updating
 Follow the steps for installing and overwrite the files when prompted.

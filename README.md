@@ -26,11 +26,7 @@ Follow the steps for installing and overwrite the files when prompted.
 Open a issue! Or create a message in a thread under my mod in the discord server and I'll try and address it when I have the time.
 
 # What it looks like
-Usernames are just pixilated for screenshot
-### No background (Default)
-![Background Off](https://github.com/YellingTree/Player-Ping-Leaderboard/blob/main/github-assets/Leaderboard_Bg_Off.png?raw=true)
-### Background On (Changed in settings)
-![Background On](https://github.com/YellingTree/Player-Ping-Leaderboard/blob/main/github-assets/Leaderboard_Bg_On.png?raw=true)
+![Background On](https://github.com/YellingTree/Player-Ping-Leaderboard/blob/main/github-assets/newdisplay.png?raw=true)
 
 # Old Changelogs from Discord
 All new changes will be listed with each [Release](https://github.com/YellingTree/Player-Ping-Leaderboard/releases)

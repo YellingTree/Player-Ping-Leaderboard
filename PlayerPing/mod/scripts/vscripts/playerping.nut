@@ -4,8 +4,6 @@ global function playerPingPreCache
 struct{
 	// Settings below to change the appearance of the display
 	float size = 20 // UI element Size, basically it's bounding box kinda I think
-	float verticalPos = 0.00 // Vertical Postion on-screen. 0.00 is max up, 1.00 is max down, default 0.00
-	float horizPos = 0.68 // Horizontal position on-screen. 0.00 is max left, 1.00 is max right, default 0.68
 	vector color = Vector(1.0, 1.0, 1.0) //color of on-screen display, standard rgb values. Supported Range 0.00 to 1.00. For easy conversion of standard rgb values that look like 255,255,255 (white) lookup a rgb value to percentage converter. 1.00 would be considered 100% 0.50 for 50%, etc..
 	float alpha = 0.6 // this is the opacity of the on-screen display, 1.00 is solid, 0.00 would be completely see through and such will be invisible.
 	float textSize = 19 // value for font size, 19 is default
@@ -24,6 +22,18 @@ var playerPing = null
 var playerName = null
 var playerKD = null
 var background = null
+
+var friendlyHeader = null
+var friendlyTeamMates = null
+var friendlyKD = null
+var friendlyPing = null
+
+var enemyHeader = null
+var enemyTeam = null
+var enemyKD = null
+var enemyPing = null
+float shifter = 0
+float horzShifter = 0
 
 void function playerPingPreCache(){
 	thread menusTread()
@@ -47,14 +57,18 @@ void function displayPings(){
   RegisterButtonPressedCallback(KEY_F1, displayOn)
 }
 
-
 void function displayOn(var button){
   entity player = GetLocalClientPlayer()
   script.show = !script.show
   if(!script.show){
-    RuiDestroyIfAlive(playerPing)
-    RuiDestroyIfAlive(playerName)
-    RuiDestroyIfAlive(playerKD)
+    RuiDestroyIfAlive(friendlyHeader)
+    RuiDestroyIfAlive(friendlyTeamMates)
+    RuiDestroyIfAlive(friendlyKD)
+    RuiDestroyIfAlive(friendlyPing)
+    RuiDestroyIfAlive(enemyHeader)
+    RuiDestroyIfAlive(enemyTeam)
+    RuiDestroyIfAlive(enemyKD)
+    RuiDestroyIfAlive(enemyPing)
     if(settings.addBackground){
       if(background != null){
         RuiDestroyIfAlive(background)
@@ -62,114 +76,185 @@ void function displayOn(var button){
     }
   }
   if(script.show){
-    thread playerNameDisplay()
+    thread friendlyTeamDisplay()
+    thread enemyTeamDisplay()
     if(settings.addBackground){
       thread backgroundCreate()
     }
     EmitSoundOnEntity(player, "menu_click")
+    thread playerPingBrain()
   }
 }
 
 void function backgroundCreate(){
-  background = RuiCreate($"ui/scoreboard_background.rpak", clGlobal.topoCockpitHudPermanent, RUI_DRAW_COCKPIT, 10)
+  background = RuiCreate($"ui/scoreboard_background.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 10)
 }
+struct{
+float vertPos = 0.50
+}overlay
+void function friendlyTeamDisplay(){
+  friendlyHeader = RuiCreate($"ui/cockpit_console_text_top_left.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 15)
+		RuiSetInt(friendlyHeader, "lineNum", 1)
+		RuiSetFloat2(friendlyHeader, "msgPos", <0.68, 0.0, 0.0>)
+		RuiSetString(friendlyHeader, "msgText", "Your Team \n---------------------------------------------------" )
+		RuiSetFloat(friendlyHeader, "msgFontSize", 21)
+    RuiSetFloat(friendlyHeader, "msgAlpha", settings.alpha)
+		RuiSetFloat(friendlyHeader, "thicken", settings.boldVal)
+		RuiSetFloat3(friendlyHeader, "msgColor", settings.color)
 
-void function playerNameDisplay(){
-  playerName = RuiCreate($"ui/cockpit_console_text_top_left.rpak", clGlobal.topoCockpitHudPermanent, RUI_DRAW_COCKPIT, 15)
-		RuiSetInt(playerName, "lineNum", 1)
-		RuiSetFloat2(playerName, "msgPos", <settings.horizPos, settings.verticalPos, 0.0>)
-		RuiSetString(playerName, "msgText", "Name Display" )
-		RuiSetFloat(playerName, "msgFontSize", settings.textSize)
-    RuiSetFloat(playerName, "msgAlpha", settings.alpha)
-		RuiSetFloat(playerName, "thicken", settings.boldVal)
-		RuiSetFloat3(playerName, "msgColor", settings.color)
-  
-  thread playerKDs()
+  friendlyTeamMates = RuiCreate($"ui/cockpit_console_text_top_left.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 15)
+		RuiSetInt(friendlyTeamMates, "lineNum", 1)
+		RuiSetFloat2(friendlyTeamMates, "msgPos", <0.68, 0.04, 0.0>)
+		RuiSetString(friendlyTeamMates, "msgText", "Name Display" )
+		RuiSetFloat(friendlyTeamMates, "msgFontSize", settings.textSize)
+    RuiSetFloat(friendlyTeamMates, "msgAlpha", settings.alpha)
+		RuiSetFloat(friendlyTeamMates, "thicken", settings.boldVal)
+		RuiSetFloat3(friendlyTeamMates, "msgColor", settings.color)
+
+  friendlyKD = RuiCreate($"ui/cockpit_console_text_top_left.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 15)
+		RuiSetInt(friendlyKD, "lineNum", 1)
+		RuiSetFloat2(friendlyKD, "msgPos", <0.83, 0.04, 0.0>)
+		RuiSetString(friendlyKD, "msgText", "fKD Display" )
+		RuiSetFloat(friendlyKD, "msgFontSize", settings.textSize)
+    RuiSetFloat(friendlyKD, "msgAlpha", settings.alpha)
+		RuiSetFloat(friendlyKD, "thicken", settings.boldVal)
+		RuiSetFloat3(friendlyKD, "msgColor", settings.color)
+
+  friendlyPing = RuiCreate($"ui/cockpit_console_text_top_left.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 15)
+		RuiSetInt(friendlyPing, "lineNum", 1)
+		RuiSetFloat2(friendlyPing, "msgPos", <0.93, 0.04, 0.0>)
+		RuiSetString(friendlyPing, "msgText", "fPing Display" )
+		RuiSetFloat(friendlyPing, "msgFontSize", settings.textSize)
+    RuiSetFloat(friendlyPing, "msgAlpha", settings.alpha)
+		RuiSetFloat(friendlyPing, "thicken", settings.boldVal)
+		RuiSetFloat3(friendlyPing, "msgColor", settings.color)
 }
-
-void function playerKDs(){
-  playerKD = RuiCreate($"ui/cockpit_console_text_top_left.rpak", clGlobal.topoCockpitHudPermanent, RUI_DRAW_COCKPIT, 15)
-		RuiSetInt(playerKD, "lineNum", 1)
-		RuiSetFloat2(playerKD, "msgPos", <settings.horizPos, settings.verticalPos, 0.0>)
-		RuiSetString(playerKD, "msgText", "KD Display" )
-		RuiSetFloat(playerKD, "msgFontSize", settings.textSize)
-    RuiSetFloat(playerKD, "msgAlpha", settings.alpha)
-		RuiSetFloat(playerKD, "thicken", settings.boldVal)
-		RuiSetFloat3(playerKD, "msgColor", settings.color)
+void function enemyTeamDisplay(){
+  shifter = 0
+  enemyHeader = RuiCreate($"ui/cockpit_console_text_top_left.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 15)
+		RuiSetInt(enemyHeader, "lineNum", 1)
+		RuiSetFloat2(enemyHeader, "msgPos", <0.68, overlay.vertPos, 0.0>)
+		RuiSetString(enemyHeader, "msgText", "Enemy Team \n--------------------------------------------------------" )
+		RuiSetFloat(enemyHeader, "msgFontSize", settings.textSize)
+    RuiSetFloat(enemyHeader, "msgAlpha", settings.alpha)
+		RuiSetFloat(enemyHeader, "thicken", settings.boldVal)
+		RuiSetFloat3(enemyHeader, "msgColor", settings.color)
     
-    thread playerPingDisplay()
-}
-void function playerPingDisplay(){
-  playerPing = RuiCreate($"ui/cockpit_console_text_top_left.rpak", clGlobal.topoCockpitHudPermanent, RUI_DRAW_COCKPIT, 15)
-		RuiSetInt(playerPing, "lineNum", 1)
-		RuiSetFloat2(playerPing, "msgPos", <settings.horizPos, settings.verticalPos, 0.0>)
-		RuiSetString(playerPing, "msgText", "Ping Display" )
-		RuiSetFloat(playerPing, "msgFontSize", settings.textSize)
-    RuiSetFloat(playerPing, "msgAlpha", settings.alpha)
-		RuiSetFloat(playerPing, "thicken", settings.boldVal)
-		RuiSetFloat3(playerPing, "msgColor", settings.color)
-    thread playerPingBrain()
+    shifter = overlay.vertPos + 0.04
+ 
+  enemyTeam = RuiCreate($"ui/cockpit_console_text_top_left.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 20)
+		RuiSetInt(enemyTeam, "lineNum", 1)
+		RuiSetFloat2(enemyTeam, "msgPos", <0.68, shifter, 0.0>)
+		RuiSetString(enemyTeam, "msgText", "eName Display" )
+		RuiSetFloat(enemyTeam, "msgFontSize", settings.textSize)
+    RuiSetFloat(enemyTeam, "msgAlpha", settings.alpha)
+		RuiSetFloat(enemyTeam, "thicken", settings.boldVal)
+		RuiSetFloat3(enemyTeam, "msgColor", settings.color)
+  
+  enemyKD = RuiCreate($"ui/cockpit_console_text_top_left.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 20)
+		RuiSetInt(enemyKD, "lineNum", 1)
+		RuiSetFloat2(enemyKD, "msgPos", <0.83, shifter, 0.0>)
+		RuiSetString(enemyKD, "msgText", "Name Display" )
+		RuiSetFloat(enemyKD, "msgFontSize", settings.textSize)
+    RuiSetFloat(enemyKD, "msgAlpha", settings.alpha)
+		RuiSetFloat(enemyKD, "thicken", settings.boldVal)
+		RuiSetFloat3(enemyKD, "msgColor", settings.color)
+  
+  enemyPing = RuiCreate($"ui/cockpit_console_text_top_left.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 20)
+		RuiSetInt(enemyPing, "lineNum", 1)
+		RuiSetFloat2(enemyPing, "msgPos", <0.93, shifter, 0.0>)
+		RuiSetString(enemyPing, "msgText", "Name Display" )
+		RuiSetFloat(enemyPing, "msgFontSize", settings.textSize)
+    RuiSetFloat(enemyPing, "msgAlpha", settings.alpha)
+		RuiSetFloat(enemyPing, "thicken", settings.boldVal)
+		RuiSetFloat3(enemyPing, "msgColor", settings.color)
+  
 }
 
+// Updates the leaderboard overlay
 void function playerPingBrain(){
-  string nameString = ""
-  string kdString = ""
-  string pingString = ""
+  var clientTeam = GetLocalClientPlayer().GetTeam()
+  string friendlyNameString = ""
+  string friendlyKdString = ""
+  string friendlyPingString = ""
+
+  string enemyNameString = ""
+  string enemyKdString = ""
+  string enemyPingString = ""
+  overlay.vertPos = 0.50
+
+  // For setting (You) to the correct player
 	entity localplayer = GetLocalClientPlayer()
 	string localname = localplayer.GetPlayerName()
-  int nameLength = 0
-
-  float kdPos = 0
-  float pingPos = 0
-
+  string sep = "--------------------------------------------------------\n"
+    //Avoids script attempting to set Ruis if destroyed.
   	while(script.show){
        if(!IsLobby() && !IsMenuLevel()){
           WaitFrame()
-           foreach(entity player in GetPlayerArray()){
-						 string userName = ""
-						 if(player.GetPlayerName() == localname){
-							 userName = "(You)" + player.GetPlayerName()
-						 }
-						 else{
-							 userName = player.GetPlayerName()
-						 }
-             int playerPing = player.GetPlayerGameStat( PGS_PING )
-						 int playerKills = player.GetPlayerGameStat( PGS_KILLS )
-						 int playerDeaths = player.GetPlayerGameStat( PGS_DEATHS )
-						 string sep = "-----------------------------------------------------------------\n"
-            
-            string converter = "0." + nameLength.tostring()
-            float converter2 = converter.tofloat()
-            
-            kdPos = settings.horizPos + 0.15
-            //settings.horizPos + (converter2 - 15)
-            pingPos = kdPos + 0.10
-            //kdPos + 0.08
-          
-             nameString = nameString + "| " + userName + "\n" + sep
-             kdString = kdString + "K/D: " + playerKills + "/" + playerDeaths + "\n\n"
-             pingString = pingString + "Ping: " + playerPing + "ms\n\n"
-             
+          //Gathering player's game info
+          int counter = 0
+          foreach(entity player in GetPlayerArray()){
+            string fUserName = ""
+            if(player.GetTeam() == clientTeam ){
+              if(player.GetPlayerName() == localname){
+                fUserName = "(You)" + player.GetPlayerName()
+              }
+              else{
+                fUserName = player.GetPlayerName()
+              }
+              int fPing = player.GetPlayerGameStat( PGS_PING )
+              int fKills = player.GetPlayerGameStat ( PGS_KILLS )
+              int fDeaths = player.GetPlayerGameStat ( PGS_DEATHS )
+
+              counter ++
+              if(counter < 2){
+                overlay.vertPos = 0.15
+              }
+              if(counter > 2){
+                overlay.vertPos = 0.50
+              }
+              if(counter > 15){
+                overlay.vertPos = 0.70
+              }
+              
+
+              friendlyNameString = friendlyNameString + "|" + fUserName + "\n\n" //+ sep
+              friendlyKdString = friendlyKdString + "K/D: " + fKills + "/" + fDeaths + "\n\n"
+              friendlyPingString = friendlyPingString + fPing + "ms\n\n"
             }
+            string eUserName = ""
+            if(player.GetTeam() != clientTeam){
+              int ePing = player.GetPlayerGameStat( PGS_PING )
+              int eKills = player.GetPlayerGameStat( PGS_KILLS )
+              int eDeaths = player.GetPlayerGameStat( PGS_DEATHS )
+              eUserName = player.GetPlayerName()
+              
+
+              enemyNameString = enemyNameString + "|" + eUserName + "\n\n" //+ sep
+              enemyKdString = enemyKdString + "K/D: " + eKills + "/" + eDeaths + "\n\n"
+              enemyPingString = enemyPingString + ePing + "ms\n\n"
+            }
+
+          }
           if(script.show){
-            RuiSetString(playerName, "msgText", nameString)
-            RuiSetString(playerKD, "msgText", kdString)
-            RuiSetString(playerPing, "msgText", pingString)
+            RuiSetString(friendlyTeamMates, "msgText", friendlyNameString)
+            RuiSetString(friendlyKD, "msgText", friendlyKdString)
+            RuiSetString(friendlyPing, "msgText", friendlyPingString)
+
+            RuiSetString(enemyTeam, "msgText", enemyNameString)
+            RuiSetString(enemyKD, "msgText", enemyKdString)
+            RuiSetString(enemyPing, "msgText", enemyPingString)
             
-            
-
-            RuiSetFloat2(playerKD, "msgPos", <kdPos, settings.verticalPos, 0.0>)
-            RuiSetFloat2(playerPing, "msgPos", <pingPos, settings.verticalPos, 0.0>)
-            
-            nameString = ""
-            kdString = ""
-            pingString = ""
-
-            
-
-
-            }
-
-  	   }
+          }
+          friendlyNameString = ""
+          friendlyKdString = ""
+          friendlyPingString = ""
+          counter = 0
+          enemyNameString = ""
+          enemyKdString = ""
+          enemyPingString = ""
+       }
     }
 }
+
+

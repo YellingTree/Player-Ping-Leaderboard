@@ -3,7 +3,7 @@
 	"Description": "Shows the ping of connected players in a server. Overlay is toggled with the F1 key.",
 	"LoadPriority": 2,
 	"RequiredOnClient": false,
-	"Version": "2.6",
+	"Version": "3.0",
 
 	"Scripts": [
 		{
